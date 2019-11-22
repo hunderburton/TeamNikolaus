@@ -14,19 +14,14 @@ class NDVI:
         self.service_endpoint = "https://processing.code-de.org/rasdaman/ows"
         self.base_wcs_url = self.service_endpoint + "?service=WCS&version=2.0.1"
         self.requestTemplate =     '''
-        for $c in (S2G5_32632_10m_L1C)
-        return
-          encode(
-            scale(
-              (((float) $c.B8 - $c.B4) / ((float) $c.B8 + $c.B4))
-              [ ansi( "{date}" ), E( {eastStart} : {eastEnd} ), N( {northStart} : {northEnd} ) ]
-              > 0.5,
-              {{ E:"CRS:1"(0:700) }}
-            )
-          , "image/jpeg")
+        for $b4 in (Germany_2D_B04_10m), $b8 in (Germany_2D_B08_10m)
+        return encode(
+            (((float) $b8 - $b4) / ((float) $b8 + $b4))
+            [ Lon(  {eastStart} :  {eastEnd} ), Lat(  {northStart} : {northEnd} ) ]
+                      > 0.5,
+                      "image/jpeg")
         '''
         self.requestTemplate = self.requestTemplate.format(date = date, eastStart = boundingBox[0], eastEnd = boundingBox[1], northStart = boundingBox[2], northEnd = boundingBox[3])
-
 
     def process(self):
         response = requests.post(self.service_endpoint, data={'query': self.requestTemplate})
@@ -37,7 +32,7 @@ class NDVI:
         fh.close()
         img = Image.open(BytesIO(data))
         arr = np.array(img)
-        print(np.average(arr) / 256)
+        # print(np.average(arr) / 256)
         w, h = img.size
         results = []
         for i in range(0,h,self.tilesize):
@@ -47,8 +42,9 @@ class NDVI:
                 east = (j + (self.tilesize / 2)) * (self.boundingBox[1] - self.boundingBox[0]) / w + self.boundingBox[0]
                 north = (i + (self.tilesize / 2)) * (self.boundingBox[3] - self.boundingBox[2]) / h + self.boundingBox[3]
                 index = TileIndex(self.calcProperties(tile), north, east)
-                print(index)
+                # print(index)
                 results.append(index)
+        return results
 
         # todo: 1d image, living plant -> white, calc index
     def calcProperties(self, image):
