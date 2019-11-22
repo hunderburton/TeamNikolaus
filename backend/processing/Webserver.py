@@ -25,7 +25,7 @@ def performQuery():
 	itemList = [item.__str__() for item in tileIndexArray]
 	seperator = ", "
 	itemList =  seperator.join(itemList)
-	ret = '{"type":"FeatureCollection","features":'+ itemList + '}'
+	ret = '{"type":"FeatureCollection","features":['+ itemList + ']}'
 	return ret
 
 

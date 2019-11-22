@@ -6,4 +6,4 @@ class TileIndex:
         self.east = east
 
     def __str__(self):
-        return '''{{type:"Feature", properties: {{id:"vegIndex", index: {vegIndex}}}, geometry: {{ type:"Point", coordinates: [{east}, {north}, 0.0]}}'''.format(east = self.east, north = self.north, vegIndex = self.vegIndex)
+        return '''{{"type":"Feature", "properties": {{"id":"vegIndex", "index": "{vegIndex}"}}, "geometry": {{ "type":"Point", "coordinates": "[{east}, {north}, 0.0]"}}}}'''.format(east = self.east, north = self.north, vegIndex = self.vegIndex)
