@@ -1,0 +1,5 @@
+Flask==1.1.1
+mkl==2019.0
+numpy==1.16.4+mkl
+Pillow==6.1.0
+requests==2.22.0
