@@ -13,6 +13,10 @@
   color: white;
 }
 
+.Span-header {
+  width: 100%;
+}
+
 .App-link {
   color: #09d3ac;
 }

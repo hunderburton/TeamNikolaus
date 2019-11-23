@@ -1,8 +1,9 @@
 import React from 'react';
-
 import ReactMapGL, { Source, Layer, Marker } from 'react-map-gl';
-
+import HeaderBanner from './HeaderBanner';
+import { WebMercatorViewport } from 'viewport-mercator-project';
 import { FaHome } from 'react-icons/fa';
+
 
 export default class MapDisplay extends React.Component {
   constructor(props) {
@@ -80,24 +81,54 @@ export default class MapDisplay extends React.Component {
     this.getIndexData();
   }
 
+  onSearchItemSelected = (selected) => {
+    if (selected.length > 0) {
+      console.log(selected[0].place_name);
+
+      var newViewport = new WebMercatorViewport(this.state.viewport);
+      const { bbox, center } = selected[0];
+
+      if (bbox) {
+        newViewport = newViewport.fitBounds([
+          [bbox[0], bbox[1]],
+          [bbox[2], bbox[3]]
+        ]);
+      } else {
+        newViewport = {
+          longitude: center[0],
+          latitude: center[1]
+        };
+      }
+      this.setState({ viewport: newViewport })
+    }
+  }
+
   render() {
     const { viewport, data, token } = this.state;
 
     return (
-      <ReactMapGL
-        {...viewport}
-        mapboxApiAccessToken={token}
-        onViewportChange={(viewport) => this.setState({ viewport })}
-        onMouseUp={() => this.getIndexData()}
-        ref={map => this.mapRef = map}
-      >
-        {this.markers.map((marker) => <Marker {...marker}>
-          <div><h2><FaHome /></h2></div>
-        </Marker>)}
-        <Source type="geojson" data={data}>
-          <Layer {...heatmapLayer} />
-        </Source>
-      </ReactMapGL>
+
+      <>
+        <HeaderBanner
+          onSearchItemSelected={this.onSearchItemSelected}
+          mapBoxToken={token}
+        />
+        <ReactMapGL
+          {...viewport}
+          mapboxApiAccessToken={token}
+          onViewportChange={(viewport) => this.setState({ viewport })}
+          onMouseUp={() => this.getIndexData()}
+          ref={map => this.mapRef = map}
+        >
+          {this.markers.map((marker) => <Marker {...marker}>
+            <div><h2><FaHome /></h2></div>
+          </Marker>)}
+          <Source type="geojson" data={data}>
+            <Layer {...heatmapLayer} />
+          </Source>
+        </ReactMapGL>
+      </>
+
     );
   }
 }

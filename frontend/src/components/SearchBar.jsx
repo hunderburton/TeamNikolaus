@@ -1,21 +1,17 @@
 import React from 'react';
+import SearchField from './SearchField';
 
-import {
-    Input,
-    InputGroup,
-    InputGroupAddon,
-    Button
-} from "reactstrap";
+export default class SearchBar extends React.Component {
 
-export default class HeaderBanner extends React.Component {
+
     render() {
+        const onSelect = this.props.onSearchItemSelected;
         return (
-            <InputGroup>
-                <Input />
-                <InputGroupAddon addonType="append">
-                    <Button color="secondary">Search</Button>
-                </InputGroupAddon>
-            </InputGroup>
+            <SearchField
+                    onChange={onSelect}
+                    mapBoxToken={this.props.mapBoxToken}
+                />
+                
         );
     }
 }

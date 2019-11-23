@@ -8,10 +8,14 @@ import {
 
 export default class HeaderBanner extends React.Component {
     render() {
+        const onSearchItemSelected = this.props.onSearchItemSelected;
         return (
             <Navbar style={{ height: "50px" }} color="dark" dark expand="md">
                 <NavbarBrand href="/">Green City Index</NavbarBrand>
-                <SearchBar />
+                <SearchBar 
+                    onSearchItemSelected={onSearchItemSelected}
+                    mapBoxToken={this.props.mapBoxToken}
+                />
             </Navbar>
         );
     }
