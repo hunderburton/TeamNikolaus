@@ -1,4 +1,5 @@
 **/venv
+**/*.jpg
 
 node_modules
 
