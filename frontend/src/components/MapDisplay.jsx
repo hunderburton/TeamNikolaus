@@ -49,14 +49,12 @@ export default class MapDisplay extends React.Component {
   createMarkers() {
     var bounds = this.mapRef.getMap().getBounds();
     var amountOfMarkers = this.getRandomInt(5, 15);
-    console.log(amountOfMarkers);
     this.markers = [];
     for (var i = 0; i < amountOfMarkers; i++) {
       var lat = this.getRandomFloat(bounds._sw.lat, bounds._ne.lat);
       var long = this.getRandomFloat(bounds._sw.lng, bounds._ne.lng);
       this.markers.push({ key: "Random-" + i, latitude: lat, longitude: long })
     }
-    console.log(this.markers);
   }
 
   async getIndexData() {
@@ -70,7 +68,7 @@ export default class MapDisplay extends React.Component {
     try {
       const response = await fetch(query);
       const responseJson = await response.json();
-      this.setState({ data: responseJson });
+      this.setState({ ...this.state, data: responseJson });
     }
     catch (error) {
       return console.error(error);
@@ -83,8 +81,6 @@ export default class MapDisplay extends React.Component {
 
   onSearchItemSelected = (selected) => {
     if (selected.length > 0) {
-      console.log(selected[0].place_name);
-
       var newViewport = new WebMercatorViewport(this.state.viewport);
       const { bbox, center } = selected[0];
 
@@ -99,7 +95,7 @@ export default class MapDisplay extends React.Component {
           latitude: center[1]
         };
       }
-      this.setState({ viewport: newViewport })
+      this.setState({ ...this.state, viewport: newViewport }, this.getIndexData);
     }
   }
 
@@ -107,7 +103,6 @@ export default class MapDisplay extends React.Component {
     const { viewport, data, token } = this.state;
 
     return (
-
       <>
         <HeaderBanner
           onSearchItemSelected={this.onSearchItemSelected}
@@ -116,7 +111,7 @@ export default class MapDisplay extends React.Component {
         <ReactMapGL
           {...viewport}
           mapboxApiAccessToken={token}
-          onViewportChange={(viewport) => this.setState({ viewport })}
+          onViewportChange={(viewport) => this.setState({ ...this.state, viewport })}
           onMouseUp={() => this.getIndexData()}
           ref={map => this.mapRef = map}
         >
