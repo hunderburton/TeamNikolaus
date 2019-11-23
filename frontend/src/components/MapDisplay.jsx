@@ -1,9 +1,22 @@
 import React from 'react';
-import ReactMapGL, { Source, Layer, Marker } from 'react-map-gl';
+import ReactMapGL, { Source, Layer, Marker, NavigationControl, FullscreenControl } from 'react-map-gl';
 import HeaderBanner from './HeaderBanner';
 import { WebMercatorViewport } from 'viewport-mercator-project';
 import { MdSchool } from 'react-icons/md';
 
+const fullscreenControlStyle = {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  padding: '10px'
+};
+
+const navStyle = {
+  position: 'absolute',
+  top: 36,
+  left: 0,
+  padding: '10px'
+};
 
 export default class MapDisplay extends React.Component {
   constructor(props) {
@@ -170,6 +183,12 @@ export default class MapDisplay extends React.Component {
           <Source type="geojson" data={data}>
             <Layer {...heatmapLayer} />
           </Source>
+          <div className="fullscreen" style={fullscreenControlStyle}>
+            <FullscreenControl />
+          </div>
+          <div className="nav" style={navStyle}>
+            <NavigationControl />
+          </div>
         </ReactMapGL>
       </>
 
