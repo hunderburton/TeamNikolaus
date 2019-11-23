@@ -14,10 +14,10 @@ def getStartCity():
 
 @app.route('/query')
 def performQuery():
-    eastFrom = (float) (request.args.get('eastFrom'))
-    eastTo = (float) (request.args.get('eastTo'))
-    northFrom = (float) (request.args.get('northFrom'))
-    northTo = (float) (request.args.get('northTo'))
+    eastFrom = (float) (request.args.get('lonFrom'))
+    eastTo = (float) (request.args.get('lonTo'))
+    northFrom = (float) (request.args.get('latFrom'))
+    northTo = (float) (request.args.get('latTo'))
     res = (int) (request.args.get('res')) # resolution in sqm
 
     # boundingBox = [490000, 493000, 5874000, 5878000]
