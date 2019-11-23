@@ -2,7 +2,7 @@ import React from 'react';
 import ReactMapGL, { Source, Layer, Marker } from 'react-map-gl';
 import HeaderBanner from './HeaderBanner';
 import { WebMercatorViewport } from 'viewport-mercator-project';
-import { FaHome } from 'react-icons/fa';
+import { MdSchool } from 'react-icons/md';
 
 
 export default class MapDisplay extends React.Component {
@@ -56,8 +56,9 @@ export default class MapDisplay extends React.Component {
       const response = await fetch(query);
       const responseJson = await response.json();
       for (const [key, value] of Object.entries(responseJson["school"])) {
-        console.log(key, value);
-        this.markers.push({ key: Math.random(), latitude: Number(value.latitude), longitude: Number(value.longitude) });
+        this.markers.push({
+          key: Math.random(), latitude: Number(value.latitude), longitude: Number(value.longitude), tags: value.tags
+        });
       }
     }
     catch (error) {
@@ -124,7 +125,7 @@ export default class MapDisplay extends React.Component {
           ref={map => this.mapRef = map}
         >
           {this.markers.map((marker) => <Marker {...marker}>
-            <div><h2><FaHome /></h2></div>
+            <div><h2><MdSchool /></h2></div>
           </Marker>)}
           <Source type="geojson" data={data}>
             <Layer {...heatmapLayer} />
