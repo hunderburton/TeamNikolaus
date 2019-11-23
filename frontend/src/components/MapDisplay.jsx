@@ -1,16 +1,18 @@
 import React from 'react';
 
-import ReactMapGL, { Source, Layer } from 'react-map-gl';
+import ReactMapGL, { Source, Layer, Marker } from 'react-map-gl';
 
 export default class MapDisplay extends React.Component {
+  markers = [];
+
   constructor(props) {
     super(props);
     this.state = {
       viewport: {
         width: this.props.width || window.innerWidth,
         height: this.props.height || window.innerHeight,
-        latitude: 52.520008,
-        longitude: 13.402254,
+        latitude: 49.8728,
+        longitude: 8.6512,
         zoom: 13
       },
       data: {
@@ -23,21 +25,30 @@ export default class MapDisplay extends React.Component {
 
   calculateBoundingBox() {
     var bounds = this.mapRef.getMap().getBounds();
-
     return {
-      eastFrom: bounds._sw.lng.toFixed(6),
-      northFrom: bounds._sw.lat.toFixed(6),
-      eastTo: bounds._ne.lng.toFixed(6),
-      northTo: bounds._ne.lat.toFixed(6),
+      latFrom: bounds._sw.lat.toFixed(6),
+      longFrom: bounds._sw.lng.toFixed(6),
+      latTo: bounds._ne.lat.toFixed(6),
+      longTo: bounds._ne.lng.toFixed(6),
       resolution: 100,
     }
   }
 
+  createMarkers() {
+    var bounds = this.mapRef.getMap().getBounds();
+    this.markers = [
+      { key: "CENTER", latitude: 49.8728, longitude: 8.6512 },
+      { key: "LEFT_UPPER", latitude: bounds._ne.lat, longitude: bounds._ne.lng },
+      { key: "RIGHT_LOWER", latitude: bounds._sw.lat, longitude: bounds._sw.lng, }
+    ];
+  }
+
   async getIndexData() {
+    this.createMarkers();
     var boundingBox = this.calculateBoundingBox();
     var query = `http://localhost:5000/query?`
-      + `eastFrom=${boundingBox.eastFrom}&northFrom=${boundingBox.northFrom}&`
-      + `eastTo=${boundingBox.eastTo}&northTo=${boundingBox.northTo}&`
+      + `latFrom=${boundingBox.latFrom}&lonFrom=${boundingBox.longFrom}&`
+      + `latTo=${boundingBox.latTo}&lonTo=${boundingBox.longTo}&`
       + `res=${boundingBox.resolution}`;
     try {
       const response = await fetch(query);
@@ -59,9 +70,11 @@ export default class MapDisplay extends React.Component {
         {...this.state.viewport}
         mapboxApiAccessToken={this.state.token}
         onViewportChange={(viewport) => this.setState({ viewport })}
-        onMouseUp={(event) => this.getIndexData()}
+        onMouseUp={() => this.getIndexData()}
         ref={map => this.mapRef = map}
+        children={this.props.children}
       >
+        {this.markers.map((marker) => <Marker {...marker}><div>{marker.key}</div></Marker>)}
         <Source type="geojson" data={this.state.data}>
           <Layer {...heatmapLayer} />
         </Source>
