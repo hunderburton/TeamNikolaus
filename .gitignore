@@ -1,4 +1,5 @@
 **/venv
+**/*.jpg
 
 node_modules
 
@@ -73,3 +74,6 @@ yarn-debug.log*
 yarn-error.log*
 
 backend/processing/__pycache__/*
+*.jpg
+*.jpeg
+*.png

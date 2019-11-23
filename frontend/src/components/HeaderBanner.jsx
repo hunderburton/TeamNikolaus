@@ -7,10 +7,6 @@ import {
 } from "reactstrap";
 
 export default class HeaderBanner extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
     render() {
         return (
             <Navbar color="dark" dark expand="md">

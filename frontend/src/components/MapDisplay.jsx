@@ -1,7 +1,6 @@
 import React from 'react';
 
-import ReactMapGL, {Source, Layer}  from 'react-map-gl';
-import {heatmapLayer} from './heatmap-style';
+import ReactMapGL, { Source, Layer } from 'react-map-gl';
 
 export default class MapDisplay extends React.Component {
   constructor(props) {
@@ -13,58 +12,45 @@ export default class MapDisplay extends React.Component {
         latitude: 52.520008,
         longitude: 13.402254,
         zoom: 13
-      }, data: {
-        type: "FeatureCollection",
-        features: [
-          {
-            type: "Feature",
-            properties: {
-              id: "co20",
-              index: 6,
-            },
-            geometry: {
-              type: "Point",
-              coordinates: [13.402254, 52.520008, 0.0]
-            }
-          },
-          {
-            type: "Feature",
-            properties: {
-              id: "co20",
-              index: 6,
-            },
-            geometry: {
-              type: "Point",
-              coordinates: [13.403254, 52.520008, 0.0]
-            }
-          },
-          {
-            type: "Feature",
-            properties: {
-              id: "co20",
-              index: 6,
-            },
-            geometry: {
-              type: "Point",
-              coordinates: [13.403254, 52.51900, 0.0]
-            }
-          },
-          {
-            type: "Feature",
-            properties: {
-              id: "co20",
-              index: 600,
-            },
-            geometry: {
-              type: "Point",
-              coordinates: [13.402254, 52.51900, 0.0]
-            }
-          }
-
-        ]
+      },
+      data: {
+        "type": "FeatureCollection",
+        "features": []
       },
       token: "pk.eyJ1IjoidGVhbW5pa29sYXVzIiwiYSI6ImNrM2FlYmVvNzBheDIzb21yc25xM2tqejYifQ.X50fYA7cIFaTb7Blk_IOtA"
     };
+  }
+
+  calculateBoundingBox() {
+    var bounds = this.mapRef.getMap().getBounds();
+
+    return {
+      eastFrom: bounds._sw.lng.toFixed(6),
+      northFrom: bounds._sw.lat.toFixed(6),
+      eastTo: bounds._ne.lng.toFixed(6),
+      northTo: bounds._ne.lat.toFixed(6),
+      resolution: 100,
+    }
+  }
+
+  async getIndexData() {
+    var boundingBox = this.calculateBoundingBox();
+    var query = `http://localhost:5000/query?`
+      + `eastFrom=${boundingBox.eastFrom}&northFrom=${boundingBox.northFrom}&`
+      + `eastTo=${boundingBox.eastTo}&northTo=${boundingBox.northTo}&`
+      + `res=${boundingBox.resolution}`;
+    try {
+      const response = await fetch(query);
+      const responseJson = await response.json();
+      this.setState({ data: responseJson });
+    }
+    catch (error) {
+      return console.error(error);
+    }
+  }
+
+  componentDidMount() {
+    this.getIndexData();
   }
 
   render() {
@@ -73,13 +59,38 @@ export default class MapDisplay extends React.Component {
         {...this.state.viewport}
         mapboxApiAccessToken={this.state.token}
         onViewportChange={(viewport) => this.setState({ viewport })}
+        onMouseUp={(event) => this.getIndexData()}
+        ref={map => this.mapRef = map}
       >
-        {this.state.data && (
-          <Source type="geojson" data={this.state.data}>
-            <Layer {...heatmapLayer} />
-          </Source>
-        )}
+        <Source type="geojson" data={this.state.data}>
+          <Layer {...heatmapLayer} />
+        </Source>
       </ReactMapGL>
     );
   }
 }
+
+const MAX_ZOOM_LEVEL = 20;
+
+export const heatmapLayer = {
+  maxzoom: MAX_ZOOM_LEVEL,
+  type: 'heatmap',
+  paint: {
+    'heatmap-weight': ['interpolate', ['linear'], ['get', 'index'], 1, 10, 10, 1],
+    'heatmap-color': ['interpolate', ['linear'], ['heatmap-density'],
+      0.00, 'rgba(0,0,0,0)',
+      0.25, 'rgba(255,128,0,0.5)',
+      0.50, 'rgba(255,255,0,0.5)',
+      0.75, 'rgba(128,255,0,0.5)',
+      1.00, 'rgba(0,255,0,0.5)'
+    ],
+    //'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, MAX_ZOOM_LEVEL, 20],
+    // Increase the heatmap color weight by zoom level
+    // heatmap-intensity is a multiplier on top of heatmap-weight
+    //'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, MAX_ZOOM_LEVEL, 3],
+    // Adjust the heatmap radius by zoom level
+    //'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, MAX_ZOOM_LEVEL, 20],
+    // Transition from heatmap to circle layer by zoom level
+    // 'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 7, 1, 9, 0]
+  }
+};
