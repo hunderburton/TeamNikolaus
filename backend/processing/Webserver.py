@@ -48,7 +48,7 @@ def perform_query():
     bounding_box = [east_from, east_to, north_from, north_to]
 
     res = int(request.args.get('res'))  # resolution in sqm
-    channels = request.args.get('chan')  # "ndvi,air,temp"
+    channels = request.args.get('channel')  # "ndvi,air,temp"
     tile_index_array = {}
     channel_list = []
     if channels:
