@@ -24,11 +24,12 @@ def performQuery():
     boundingBox = [eastFrom, eastTo, northFrom, northTo]
     print("Boundary Box:")
     [print(item) for item in boundingBox]
-    n1 = ndvi.NDVI(boundingBox, "2018-05-25", res, {})
+    tileIndexArray = {}
+    n1 = ndvi.NDVI(boundingBox, "2018-05-25", res, tileIndexArray)
     tileIndexArray = n1.process()
     print("Num Results NDVI: " + str(len(tileIndexArray)))
     no2 = airQuality.AirQuality(boundingBox, "2018-05-25", res, tileIndexArray)
-    tileIndexArray = no2.process()
+    #tileIndexArray = no2.process()
     print("Num Results NO2: " + str(len(tileIndexArray)))
     #test =[item.__dict__ for item in tileIndexArray]
     itemList = [item.__str__() for item in tileIndexArray.values()]

@@ -118,13 +118,13 @@ export const heatmapLayer = {
       ]
     },
     'heatmap-color': ['interpolate', ['linear'], ['heatmap-density'],
-      0.00, 'rgba(0,0,0,0)',
+      0.00, 'rgba(255,0,0,0.1)',
       0.25, 'rgba(255,128,0,0.5)',
       0.50, 'rgba(255,255,0,0.5)',
       0.75, 'rgba(128,255,0,0.5)',
       1.00, 'rgba(0,255,0,0.5)'
     ],
-    //'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, MAX_ZOOM_LEVEL, 20],
+    'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 10, 15, 30]
     // Increase the heatmap color weight by zoom level
     // heatmap-intensity is a multiplier on top of heatmap-weight
     //'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, MAX_ZOOM_LEVEL, 3],

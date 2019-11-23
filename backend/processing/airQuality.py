@@ -58,7 +58,7 @@ class AirQuality:
                     for k in range(0, tilesPerPixel, 1):
                         for l in range(0, tilesPerPixel, 1):
                             lon = 0.5 * widthOfTileLon + (x * tilesPerPixel + k) * widthOfTileLon + self.boundingBox[0]
-                            lat = 0.5 * heightOfTileLat + (y * tilesPerPixel + l) * heightOfTileLat + self.boundingBox[2]
+                            lat = self.boundingBox[3] - (0.5 * heightOfTileLat + (y * tilesPerPixel + l) * heightOfTileLat)
                             index = TileIndex(lat, lon)
                             # print(index)
                             key = str(lon) + "." + str(lat)
@@ -71,7 +71,7 @@ class AirQuality:
                     box = (x, y, x + self.tilesize, y + self.tilesize)
                     tile = img.crop(box)
                     lon = (x + (self.tilesize / 2)) * (self.boundingBox[1] - self.boundingBox[0]) / pixelsInWidth + self.boundingBox[0] + self.boundingBox[0]
-                    lat = (y + (self.tilesize / 2)) * (self.boundingBox[3] - self.boundingBox[2]) / pixelsInHeight + self.boundingBox[3] + self.boundingBox[2]
+                    lat = self.boundingBox[3] - (y + (self.tilesize / 2)) * (self.boundingBox[3] - self.boundingBox[2]) / pixelsInHeight + self.boundingBox[3]
                     index = TileIndex(lat, lon)
                     key = str(lon) + "." + str(lat)
                     if(key not in self.itemList.keys()):

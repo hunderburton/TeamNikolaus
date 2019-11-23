@@ -42,7 +42,7 @@ class NDVI:
                 box = (j, i, j + self.tilesize, i + self.tilesize)
                 tile = img.crop(box)
                 east = (j + (self.tilesize / 2)) * (self.boundingBox[1] - self.boundingBox[0]) / w + self.boundingBox[0]
-                north = (i + (self.tilesize / 2)) * (self.boundingBox[3] - self.boundingBox[2]) / h + self.boundingBox[3]
+                north = self.boundingBox[3] - (i + (self.tilesize / 2)) * (self.boundingBox[3] - self.boundingBox[2]) / h
 
                 key = str(east) + "." + str(north)
                 if(key not in self.itemList.keys()):
