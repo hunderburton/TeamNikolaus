@@ -9,6 +9,7 @@ class AirQuality:
     def __init__(self, boundingBox, date, res = 100, itemList = {}):
         self.boundingBox = boundingBox
         self.date = date
+        # Image resolution (quality) coming from the satellite
         self.spatialResolution = 1000
         self.itemList = itemList
         # Resolution around 7 km
@@ -30,13 +31,6 @@ class AirQuality:
             $c[ Lon(  {eastStart} :  {eastEnd} ), Lat(  {northStart} : {northEnd} ) ] * 2
             , "image/jpeg")
         '''
-
-        #for $b4 in (Germany_2D_B04_10m), $b8 in (Germany_2D_B08_10m)
-        #return encode(
-        #    (((float) $b8 - $b4) / ((float) $b8 + $b4))
-        #    [ Lon(  {eastStart} :  {eastEnd} ), Lat(  {northStart} : {northEnd} ) ]
-        #              > 0.5,
-        #              "image/jpeg")
 
         self.requestTemplate = self.requestTemplate.format(date = date, eastStart = boundingBox[0], eastEnd = boundingBox[1], northStart = boundingBox[2], northEnd = boundingBox[3])
 
