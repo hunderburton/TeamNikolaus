@@ -22,7 +22,7 @@ def performQuery():
 	n1 = ndvi.NDVI(boundingBox, "2018-05-25", res)
 	tileIndexArray = n1.process()
 	#test =[item.__dict__ for item in tileIndexArray]
-	itemList = [item.__str__() for item in tileIndexArray]
+	itemList = [item.__str__() for item in tileIndexArray.values()]
 	seperator = ", "
 	itemList =  seperator.join(itemList)
 	ret = '{"type":"FeatureCollection","features":['+ itemList + ']}'
