@@ -49,7 +49,7 @@ def perform_query():
 
     res = int(request.args.get('res'))  # resolution in sqm
     channels = request.args.get('chan')  # "ndvi,air,temp"
-
+    tile_index_array = {}
     channel_list = []
     if channels:
         channel_list = channels.split(",")
@@ -58,7 +58,7 @@ def perform_query():
         for chan in channel_list:
             print(chan)
             if chan == "ndvi":
-                alg1_ndvi = ndvi.NDVI(bounding_box, "2018-05-25", res, {})
+                alg1_ndvi = ndvi.NDVI(bounding_box, "2018-05-25", res, tile_index_array)
                 tile_index_array = alg1_ndvi.process()
             elif chan == "air":
                 alg2_air = airQuality.AirQuality(bounding_box, "2018-05-25", res, tile_index_array)
