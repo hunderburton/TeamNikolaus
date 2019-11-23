@@ -9,7 +9,7 @@ import {
 export default class HeaderBanner extends React.Component {
     render() {
         return (
-            <Navbar color="dark" dark expand="md">
+            <Navbar style={{ height: "50px" }} color="dark" dark expand="md">
                 <NavbarBrand href="/">Green City Index</NavbarBrand>
                 <SearchBar />
             </Navbar>
