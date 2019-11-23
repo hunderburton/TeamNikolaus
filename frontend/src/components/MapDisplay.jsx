@@ -3,17 +3,15 @@ import React from 'react';
 import ReactMapGL, { Source, Layer, Marker } from 'react-map-gl';
 
 export default class MapDisplay extends React.Component {
-  markers = [];
-
   constructor(props) {
     super(props);
     this.state = {
       viewport: {
         width: this.props.width || window.innerWidth,
-        height: this.props.height || window.innerHeight,
+        height: this.props.height || window.innerHeight - 50,
         latitude: 49.8728,
         longitude: 8.6512,
-        zoom: 13
+        zoom: 15
       },
       data: {
         "type": "FeatureCollection",
@@ -34,12 +32,17 @@ export default class MapDisplay extends React.Component {
     }
   }
 
+  getRandomFloat(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  markers = [];
   createMarkers() {
     var bounds = this.mapRef.getMap().getBounds();
+    var lat = this.getRandomFloat(bounds._sw.lat, bounds._ne.lat);
+    var long = this.getRandomFloat(bounds._sw.lng, bounds._ne.lng);
     this.markers = [
-      { key: "CENTER", latitude: 49.8728, longitude: 8.6512 },
-      { key: "LEFT_UPPER", latitude: bounds._ne.lat, longitude: bounds._ne.lng },
-      { key: "RIGHT_LOWER", latitude: bounds._sw.lat, longitude: bounds._sw.lng, }
+      { key: "Random", latitude: lat, longitude: long }
     ];
   }
 
@@ -64,18 +67,27 @@ export default class MapDisplay extends React.Component {
     this.getIndexData();
   }
 
+
+  onViewportChange = viewport => {
+    const { width, height, ...etc } = viewport
+    this.setState({ viewport: etc })
+  }
+
   render() {
+    const { viewport, data, token } = this.state;
+
     return (
       <ReactMapGL
-        {...this.state.viewport}
-        mapboxApiAccessToken={this.state.token}
+        width='100%'
+        height='100%'
+        {...viewport}
+        mapboxApiAccessToken={token}
         onViewportChange={(viewport) => this.setState({ viewport })}
         onMouseUp={() => this.getIndexData()}
         ref={map => this.mapRef = map}
-        children={this.props.children}
       >
         {this.markers.map((marker) => <Marker {...marker}><div>{marker.key}</div></Marker>)}
-        <Source type="geojson" data={this.state.data}>
+        <Source type="geojson" data={data}>
           <Layer {...heatmapLayer} />
         </Source>
       </ReactMapGL>
