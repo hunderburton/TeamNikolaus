@@ -19,18 +19,16 @@ export default class MapDisplay extends React.Component {
       },
       token: "pk.eyJ1IjoidGVhbW5pa29sYXVzIiwiYSI6ImNrM2FlYmVvNzBheDIzb21yc25xM2tqejYifQ.X50fYA7cIFaTb7Blk_IOtA"
     };
-    this.getIndexData();
   }
 
   calculateBoundingBox() {
-    var longitude = this.state.viewport.longitude;
-    var latitude = this.state.viewport.latitude;
-    var offset = 0.01;
+    var bounds = this.mapRef.getMap().getBounds();
+
     return {
-      eastFrom: longitude - offset,
-      northFrom: latitude - offset,
-      eastTo: longitude + offset,
-      northTo: latitude + offset,
+      eastFrom: bounds._sw.lng.toFixed(6),
+      northFrom: bounds._sw.lat.toFixed(6),
+      eastTo: bounds._ne.lng.toFixed(6),
+      northTo: bounds._ne.lat.toFixed(6),
       resolution: 100,
     }
   }
@@ -51,8 +49,7 @@ export default class MapDisplay extends React.Component {
     }
   }
 
-  onViewportChange = viewport => {
-    this.setState({ viewport });
+  componentDidMount() {
     this.getIndexData();
   }
 
@@ -61,13 +58,13 @@ export default class MapDisplay extends React.Component {
       <ReactMapGL
         {...this.state.viewport}
         mapboxApiAccessToken={this.state.token}
-        onViewportChange={(viewport) => this.onViewportChange(viewport)}
+        onViewportChange={(viewport) => this.setState({ viewport })}
+        onMouseUp={(event) => this.getIndexData()}
+        ref={map => this.mapRef = map}
       >
-        {
-          <Source type="geojson" data={this.state.data}>
-            <Layer {...heatmapLayer} />
-          </Source>
-        }
+        <Source type="geojson" data={this.state.data}>
+          <Layer {...heatmapLayer} />
+        </Source>
       </ReactMapGL>
     );
   }
