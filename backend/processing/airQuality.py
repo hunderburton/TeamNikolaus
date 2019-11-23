@@ -9,10 +9,9 @@ class AirQuality:
     def __init__(self, boundingBox, date, res = 100, itemList = {}):
         self.boundingBox = boundingBox
         self.date = date
-        # Image resolution (quality) coming from the satellite
-        self.spatialResolution = 1000
+        # Image resolution (quality) coming from the satellite (2000 meters per pixel)
+        self.spatialResolution = 2000
         self.itemList = itemList
-        # Resolution around 7 km
         self.tilesize = (int) (res / 10)
         if res > self.spatialResolution:
             self.tilesize = (int) (res / self.spatialResolution)
