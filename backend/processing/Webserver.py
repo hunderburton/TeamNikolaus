@@ -22,7 +22,7 @@ def performQuery():
 
     # boundingBox = [490000, 493000, 5874000, 5878000]
     boundingBox = [eastFrom, eastTo, northFrom, northTo]
-	print("Boundary Box:")
+    print("Boundary Box:")
     [print(item) for item in boundingBox]
     n1 = ndvi.NDVI(boundingBox, "2018-05-25", res, {})
     tileIndexArray = n1.process()
@@ -39,6 +39,7 @@ def performQuery():
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['content-type'] = 'application/json'
     return response
+
 
 if __name__ == '__main__':
     app.run()
