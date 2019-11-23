@@ -46,19 +46,27 @@ export default class MapDisplay extends React.Component {
   }
 
   markers = [];
-  createMarkers() {
-    var bounds = this.mapRef.getMap().getBounds();
-    var amountOfMarkers = this.getRandomInt(5, 15);
-    this.markers = [];
-    for (var i = 0; i < amountOfMarkers; i++) {
-      var lat = this.getRandomFloat(bounds._sw.lat, bounds._ne.lat);
-      var long = this.getRandomFloat(bounds._sw.lng, bounds._ne.lng);
-      this.markers.push({ key: "Random-" + i, latitude: lat, longitude: long })
+  async getAmenities() {
+    var boundingBox = this.calculateBoundingBox();
+    var query = `http://localhost:5000/query/amenities`
+      + `?latFrom=${boundingBox.latFrom}&lonFrom=${boundingBox.longFrom}`
+      + `&latTo=${boundingBox.latTo}&lonTo=${boundingBox.longTo}`
+      + `&amenities=school`;
+    try {
+      const response = await fetch(query);
+      const responseJson = await response.json();
+      for (const [key, value] of Object.entries(responseJson["school"])) {
+        console.log(key, value);
+        this.markers.push({ key: Math.random(), latitude: Number(value.latitude), longitude: Number(value.longitude) });
+      }
+    }
+    catch (error) {
+      return console.error(error);
     }
   }
 
   async getIndexData() {
-    this.createMarkers();
+    this.getAmenities();
     var boundingBox = this.calculateBoundingBox();
     var query = `http://localhost:5000/query`
       + `?latFrom=${boundingBox.latFrom}&lonFrom=${boundingBox.longFrom}`

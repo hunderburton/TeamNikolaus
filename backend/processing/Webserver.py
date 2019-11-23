@@ -2,13 +2,40 @@ from flask import Flask, request, make_response
 import ndvi, airQuality
 import tileIndex
 import json
+import osm_processor
 
 app = Flask(__name__)
 
 
 @app.route('/')
 def get_start_city():
-    return '{"cityName":"Berlin"}'
+    return '{}'
+
+
+@app.route('/query/amenities')
+def query_amenities():
+    lat_from = float(request.args.get('latFrom'))
+    lon_from = float(request.args.get('lonFrom'))
+    lat_to = float(request.args.get('latTo'))
+    lon_to = float(request.args.get('lonTo'))
+    amenities_selector = str(request.args.get('amenities'))
+
+    result = osm_processor.query_amenities(lat_from, lon_from, lat_to, lon_to, amenities_selector)
+
+    amenities = {
+        amenities_selector: [],
+    }
+    for amenity in result.nodes:
+        amenities[amenities_selector].append({
+            "latitude": str(amenity.lat),
+            "longitude": str(amenity.lon),
+            "tags": amenity.tags,
+        })
+
+    response = make_response(amenities)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['content-type'] = 'application/json'
+    return response
 
 
 @app.route('/query')
