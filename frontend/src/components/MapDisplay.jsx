@@ -20,7 +20,24 @@ export default class MapDisplay extends React.Component {
         "type": "FeatureCollection",
         "features": []
       },
-      token: "pk.eyJ1IjoidGVhbW5pa29sYXVzIiwiYSI6ImNrM2FlYmVvNzBheDIzb21yc25xM2tqejYifQ.X50fYA7cIFaTb7Blk_IOtA"
+      token: "pk.eyJ1IjoidGVhbW5pa29sYXVzIiwiYSI6ImNrM2FlYmVvNzBheDIzb21yc25xM2tqejYifQ.X50fYA7cIFaTb7Blk_IOtA",
+      layers: [
+        {
+          type: "ndvi",
+          label: "Vegetation Index",
+          enabled: true
+        },
+        {
+          type: "air",
+          label: "Air Quality",
+          enabled: true
+        },
+        {
+          type: "temp",
+          label: "Heat Spots",
+          enabled: true
+        }
+      ]
     };
   }
 
@@ -69,11 +86,23 @@ export default class MapDisplay extends React.Component {
   async getIndexData() {
     this.getAmenities();
     var boundingBox = this.calculateBoundingBox();
+    var channels = "";
+    for (var i = 0; i < this.state.layers.length; i++) {
+      if (this.state.layers[i].enabled) {
+        if (channels == "") {
+          channels = this.state.layers[i].type;
+        }
+        else {
+          channels = channels + "," + this.state.layers[i].type;
+        }
+        
+      }
+    }
     var query = `http://localhost:5000/query`
       + `?latFrom=${boundingBox.latFrom}&lonFrom=${boundingBox.longFrom}`
       + `&latTo=${boundingBox.latTo}&lonTo=${boundingBox.longTo}`
       + `&res=${boundingBox.resolution}`
-      + `&channel=ndvi`;
+      + `&channel=${channels}`;
     try {
       const response = await fetch(query);
       const responseJson = await response.json();
@@ -108,6 +137,12 @@ export default class MapDisplay extends React.Component {
     }
   }
 
+  configureLayers = (layers) => {
+    this.setState({layers}, () => {
+      this.getIndexData();
+    });
+  }
+
   render() {
     const { viewport, data, token } = this.state;
 
@@ -116,6 +151,8 @@ export default class MapDisplay extends React.Component {
         <HeaderBanner
           onSearchItemSelected={this.onSearchItemSelected}
           mapBoxToken={token}
+          configureLayers={this.configureLayers}
+          startingLayersConfig={this.state.layers}
         />
         <ReactMapGL
           {...viewport}
