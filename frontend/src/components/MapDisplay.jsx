@@ -95,7 +95,7 @@ export default class MapDisplay extends React.Component {
         else {
           channels = channels + "," + this.state.layers[i].type;
         }
-        
+
       }
     }
     var query = `http://localhost:5000/query`
@@ -138,7 +138,7 @@ export default class MapDisplay extends React.Component {
   }
 
   configureLayers = (layers) => {
-    this.setState({layers}, () => {
+    this.setState({ layers }, () => {
       this.getIndexData();
     });
   }
@@ -162,7 +162,10 @@ export default class MapDisplay extends React.Component {
           ref={map => this.mapRef = map}
         >
           {this.markers.map((marker) => <Marker {...marker}>
-            <div><h2><MdSchool /></h2></div>
+            <div>
+              <h2><MdSchool /></h2>
+              <p>{marker.tags.name}</p>
+            </div>
           </Marker>)}
           <Source type="geojson" data={data}>
             <Layer {...heatmapLayer} />
