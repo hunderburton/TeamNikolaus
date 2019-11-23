@@ -2,6 +2,8 @@ import React from 'react';
 
 import ReactMapGL, { Source, Layer, Marker } from 'react-map-gl';
 
+import { FaHome } from 'react-icons/fa';
+
 export default class MapDisplay extends React.Component {
   constructor(props) {
     super(props);
@@ -24,12 +26,18 @@ export default class MapDisplay extends React.Component {
   calculateBoundingBox() {
     var bounds = this.mapRef.getMap().getBounds();
     return {
-      latFrom: bounds._sw.lat.toFixed(6),
-      longFrom: bounds._sw.lng.toFixed(6),
-      latTo: bounds._ne.lat.toFixed(6),
-      longTo: bounds._ne.lng.toFixed(6),
+      latFrom: bounds._sw.lat,
+      longFrom: bounds._sw.lng,
+      latTo: bounds._ne.lat,
+      longTo: bounds._ne.lng,
       resolution: 100,
     }
+  }
+
+  getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
   getRandomFloat(min, max) {
@@ -39,11 +47,15 @@ export default class MapDisplay extends React.Component {
   markers = [];
   createMarkers() {
     var bounds = this.mapRef.getMap().getBounds();
-    var lat = this.getRandomFloat(bounds._sw.lat, bounds._ne.lat);
-    var long = this.getRandomFloat(bounds._sw.lng, bounds._ne.lng);
-    this.markers = [
-      { key: "Random", latitude: lat, longitude: long }
-    ];
+    var amountOfMarkers = this.getRandomInt(5, 15);
+    console.log(amountOfMarkers);
+    this.markers = [];
+    for (var i = 0; i < amountOfMarkers; i++) {
+      var lat = this.getRandomFloat(bounds._sw.lat, bounds._ne.lat);
+      var long = this.getRandomFloat(bounds._sw.lng, bounds._ne.lng);
+      this.markers.push({ key: "Random-" + i, latitude: lat, longitude: long })
+    }
+    console.log(this.markers);
   }
 
   async getIndexData() {
@@ -67,12 +79,6 @@ export default class MapDisplay extends React.Component {
     this.getIndexData();
   }
 
-
-  onViewportChange = viewport => {
-    const { width, height, ...etc } = viewport
-    this.setState({ viewport: etc })
-  }
-
   render() {
     const { viewport, data, token } = this.state;
 
@@ -86,7 +92,9 @@ export default class MapDisplay extends React.Component {
         onMouseUp={() => this.getIndexData()}
         ref={map => this.mapRef = map}
       >
-        {this.markers.map((marker) => <Marker {...marker}><div>{marker.key}</div></Marker>)}
+        {this.markers.map((marker) => <Marker {...marker}>
+          <div><h2><FaHome /></h2></div>
+        </Marker>)}
         <Source type="geojson" data={data}>
           <Layer {...heatmapLayer} />
         </Source>
@@ -101,7 +109,14 @@ export const heatmapLayer = {
   maxzoom: MAX_ZOOM_LEVEL,
   type: 'heatmap',
   paint: {
-    'heatmap-weight': ['interpolate', ['linear'], ['get', 'index'], 1, 10, 10, 1],
+    'heatmap-weight': {
+      property: 'index',
+      type: 'exponential',
+      stops: [
+        [0, 0],
+        [1, 1]
+      ]
+    },
     'heatmap-color': ['interpolate', ['linear'], ['heatmap-density'],
       0.00, 'rgba(0,0,0,0)',
       0.25, 'rgba(255,128,0,0.5)',
