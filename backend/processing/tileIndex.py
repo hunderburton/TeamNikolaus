@@ -23,4 +23,4 @@ class TileIndex:
         return self.overallIndex
 
     def __str__(self):
-        return '''{{"type":"Feature", "properties": {{"index": "{overallIndex}"}}, "geometry": {{ "type":"Point", "coordinates": [{east}, {north}, 0.0]}}}}'''.format(east = self.east, north = self.north, overallIndex = self.getOverallIndex())
+        return '''{{"type":"Feature", "properties": {{"index": {overallIndex}}}, "geometry": {{ "type":"Point", "coordinates": [{east}, {north}, 0.0]}}}}'''.format(east = self.east, north = self.north, overallIndex = self.getOverallIndex())
