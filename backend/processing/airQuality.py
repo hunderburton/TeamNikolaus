@@ -6,14 +6,15 @@ from io import BytesIO
 
 
 class AirQuality:
-    def __init__(self, boundingBox, date, res = 100):
+    def __init__(self, boundingBox, date, res = 100, itemList = {}):
         self.boundingBox = boundingBox
         self.date = date
-
+        self.spatialResolution = 1000
+        self.itemList = itemList
         # Resolution around 7 km
         self.tilesize = (int) (res / 10)
-        if res > 7000:
-            self.tilesize = (int) (res / 7000)
+        if res > self.spatialResolution:
+            self.tilesize = (int) (res / self.spatialResolution)
         else:
             self.tilesize = 1
         self.resolution = res
@@ -24,7 +25,7 @@ class AirQuality:
 
         # Lon( 7.6512 : 16.7512 ), Lat( 45.8728 : 49.9728 )
         self.requestTemplate = '''
-        for $c in (No2_Tropo) 
+        for $c in (No2_Tropo)
         return encode(
             $c[ Lon(  {eastStart} :  {eastEnd} ), Lat(  {northStart} : {northEnd} ) ] * 2
             , "image/jpeg")
@@ -50,10 +51,9 @@ class AirQuality:
         arr = np.array(img)
         # print(np.average(arr) / 256)
         pixelsInWidth, pixelsInHeight = img.size
-        results = []
-        tilesPerPixel = 7000 / self.resolution
+        tilesPerPixel = (int) (self.spatialResolution / self.resolution)
 
-        if self.resolution < 7000:
+        if self.resolution < self.spatialResolution:
             for x in range(0, pixelsInWidth, 1):
                 for y in range(0, pixelsInHeight, 1):
                     box = (x, y, x + 1, y + 1)
@@ -63,25 +63,30 @@ class AirQuality:
                     numberOfTilesLat = pixelsInHeight * tilesPerPixel
                     widthOfTileLon = (self.boundingBox[1] - self.boundingBox[0]) / numberOfTilesLon
                     heightOfTileLat = (self.boundingBox[3] - self.boundingBox[2]) / numberOfTilesLat
-                    for k in range(0, tilesPerPixel, self.resolution):
-                        for l in range(0, tilesPerPixel, self.resolution):
-                            lon = 0.5 * widthOfTileLon + (x * tilesPerPixel + k) * widthOfTileLon
-                            lat = 0.5 * heightOfTileLat + (y * tilesPerPixel + l) * heightOfTileLat
-                            index = TileIndex(pixelIndex, lat, lon)
+                    for k in range(0, tilesPerPixel, 1):
+                        for l in range(0, tilesPerPixel, 1):
+                            lon = 0.5 * widthOfTileLon + (x * tilesPerPixel + k) * widthOfTileLon + self.boundingBox[0]
+                            lat = 0.5 * heightOfTileLat + (y * tilesPerPixel + l) * heightOfTileLat + self.boundingBox[2]
+                            index = TileIndex(lat, lon)
                             # print(index)
-                            results.append(index)
+                            key = str(x * tilesPerPixel + k) + "." + str(y * tilesPerPixel + l)
+                            if(key not in self.itemList.keys()):
+                                self.itemList[key] = TileIndex(lat, lon)
+                            self.itemList[key].setNo2Index(pixelIndex)
         else:
             for x in range(0, pixelsInWidth, self.tilesize):
                 for y in range(0, pixelsInHeight, self.tilesize):
                     box = (x, y, x + self.tilesize, y + self.tilesize)
                     tile = img.crop(box)
-                    lon = (x + (self.tilesize / 2)) * (self.boundingBox[1] - self.boundingBox[0]) / pixelsInWidth + self.boundingBox[0]
-                    lat = (y + (self.tilesize / 2)) * (self.boundingBox[3] - self.boundingBox[2]) / pixelsInHeight + self.boundingBox[3]
-                    index = TileIndex(self.calcIndex(tile), lat, lon)
-                    # print(index)
-                    results.append(index)
+                    lon = (x + (self.tilesize / 2)) * (self.boundingBox[1] - self.boundingBox[0]) / pixelsInWidth + self.boundingBox[0] + self.boundingBox[0]
+                    lat = (y + (self.tilesize / 2)) * (self.boundingBox[3] - self.boundingBox[2]) / pixelsInHeight + self.boundingBox[3] + self.boundingBox[2]
+                    index = TileIndex(lat, lon)
+                    key = str(x) + "." + str(y)
+                    if(key not in self.itemList.keys()):
+                        self.itemList[key] = TileIndex(lat, lon)
+                    self.itemList[key].setNo2Index(self.calcIndex(tile))
 
-        return results
+        return self.itemList
 
     # todo: 1d image, living plant -> white, calc index
     def calcIndex(self, image):

@@ -1,5 +1,5 @@
 from flask import Flask,request
-import ndvi
+import ndvi, airQuality
 import tileIndex
 import json
 
@@ -21,6 +21,8 @@ def performQuery():
 	boundingBox = [eastFrom, eastTo, northFrom, northTo]
 	n1 = ndvi.NDVI(boundingBox, "2018-05-25", res)
 	tileIndexArray = n1.process()
+	no2 = airQuality.AirQuality(boundingBox, "2018-05-25", res, tileIndexArray)
+	tileIndexArray = no2.process()
 	#test =[item.__dict__ for item in tileIndexArray]
 	itemList = [item.__str__() for item in tileIndexArray.values()]
 	seperator = ", "
