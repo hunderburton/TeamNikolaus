@@ -3,93 +3,52 @@ import ndvi, airQuality
 import tileIndex
 import json
 
-
 app = Flask(__name__)
 
 
 @app.route('/')
-def getStartCity():
+def get_start_city():
     return '{"cityName":"Berlin"}'
 
 
 @app.route('/query')
-def performQuery():
-    eastFrom = (float) (request.args.get('lonFrom'))
-    eastTo = (float) (request.args.get('lonTo'))
-    northFrom = (float) (request.args.get('latFrom'))
-    northTo = (float) (request.args.get('latTo'))
-    res = (int) (request.args.get('res')) # resolution in sqm
-
+def perform_query():
+    east_from = float(request.args.get('lonFrom'))
+    east_to = float(request.args.get('lonTo'))
+    north_from = float(request.args.get('latFrom'))
+    north_to = float(request.args.get('latTo'))
     # boundingBox = [490000, 493000, 5874000, 5878000]
-    boundingBox = [eastFrom, eastTo, northFrom, northTo]
-    print("Boundary Box:")
-    [print(item) for item in boundingBox]
-    tileIndexArray = {}
-    n1 = ndvi.NDVI(boundingBox, "2018-05-25", res, tileIndexArray)
-    tileIndexArray = n1.process()
-    print("Num Results NDVI: " + str(len(tileIndexArray)))
-    no2 = airQuality.AirQuality(boundingBox, "2018-05-25", res, tileIndexArray)
-    #tileIndexArray = no2.process()
-    print("Num Results NO2: " + str(len(tileIndexArray)))
-    #test =[item.__dict__ for item in tileIndexArray]
-    itemList = [item.__str__() for item in tileIndexArray.values()]
-    print("Num Results: " + str(len(itemList)))
-    seperator = ", "
-    itemList =  seperator.join(itemList)
-    response = make_response('{"type":"FeatureCollection","features":[' + itemList + ']}')
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['content-type'] = 'application/json'
-    return response
+    bounding_box = [east_from, east_to, north_from, north_to]
 
-# http://127.0.0.1:5000/query?lonFrom=8.6512&lonTo=8.7512&latFrom=49.8728&latTo=49.9728&res=100
-# http://127.0.0.1:5000/query_ch?lonFrom=8.6512&lonTo=8.7512&latFrom=49.8728&latTo=49.9728&res=100&chan=ndvi,air,temp
-#"properties": {"index": "0.2069140625"}, "geometry": { "type":"Point", "coordinates": [8.652998561151078, 49.973399520383694, 0.0]}}
-# [ndvi,air,temp]
-@app.route('/query_ch')
-def performQueryChannel():
-    eastFrom = (float) (request.args.get('lonFrom'))
-    eastTo = (float) (request.args.get('lonTo'))
-    northFrom = (float) (request.args.get('latFrom'))
-    northTo = (float) (request.args.get('latTo'))
-    res = (int) (request.args.get('res')) # resolution in sqm
+    res = int(request.args.get('res'))  # resolution in sqm
+    channels = request.args.get('chan')  # "ndvi,air,temp"
 
-    tileIndexArray = {}
-    # boundingBox = [490000, 493000, 5874000, 5878000]
-    boundingBox = [eastFrom, eastTo, northFrom, northTo]
-
-    # Get processing channels that are needed for this request
-    predefChannels = ["ndvi", "air", "temp"]
-    chanStr = request.args.get('chan')  # "ndvi,air,temp"
-    chanList = []
-    if chanStr:
-        chanList = chanStr.split(",")
-
+    channel_list = []
+    if channels:
+        channel_list = channels.split(",")
     # Process just specified channels
-    if chanList: # has items
-        for chan in chanList:
+    if channel_list:  # has items
+        for chan in channel_list:
             print(chan)
             if chan == "ndvi":
-                alg1Ndvi = ndvi.NDVI(boundingBox, "2018-05-25", res)
-                tileIndexArray = alg1Ndvi.process()
+                alg1_ndvi = ndvi.NDVI(bounding_box, "2018-05-25", res, {})
+                tile_index_array = alg1_ndvi.process()
             elif chan == "air":
-                alg2Air = airQuality.AirQuality(boundingBox, "2018-05-25", res, tileIndexArray)
-                tileIndexArray = alg2Air.process()
-            #elif chan == "temp":
-                # todo
-
+                alg2_air = airQuality.AirQuality(bounding_box, "2018-05-25", res, tile_index_array)
+                tile_index_array = alg2_air.process()
+            # elif chan == "temp":
+            # TODO implement
     # Process everything:
     else:
-        alg1Ndvi = ndvi.NDVI(boundingBox, "2018-05-25", res)
-        tileIndexArray = alg1Ndvi.process()
-        alg2Air = airQuality.AirQuality(boundingBox, "2018-05-25", res, tileIndexArray)
-        tileIndexArray = alg2Air.process()
+        alg1_ndvi = ndvi.NDVI(bounding_box, "2018-05-25", res, {})
+        tile_index_array = alg1_ndvi.process()
+        alg2_air = airQuality.AirQuality(bounding_box, "2018-05-25", res, tile_index_array)
+        tile_index_array = alg2_air.process()
 
-
-    #test =[item.__dict__ for item in tileIndexArray]
-    itemList = [item.__str__() for item in tileIndexArray.values()]
-    seperator = ", "
-    itemList =  seperator.join(itemList)
-    response = make_response('{"type":"FeatureCollection","features":[' + itemList + ']}')
+    items = [item.__str__() for item in tile_index_array.values()]
+    separator = ", "
+    items = separator.join(items)
+    response = make_response('{"type":"FeatureCollection","features":[' + items + ']}')
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['content-type'] = 'application/json'
     return response

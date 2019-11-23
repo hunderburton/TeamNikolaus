@@ -75,6 +75,24 @@ export default class MapDisplay extends React.Component {
     }
   }
 
+  async getIndexDataByChannel() {
+    this.createMarkers();
+    var boundingBox = this.calculateBoundingBox();
+    var query = `http://localhost:5000/query`
+      + `?latFrom=${boundingBox.latFrom}&lonFrom=${boundingBox.longFrom}`
+      + `&latTo=${boundingBox.latTo}&lonTo=${boundingBox.longTo}`
+      + `&res=${boundingBox.resolution}`
+      + `&channel=ndvi`;
+    try {
+      const response = await fetch(query);
+      const responseJson = await response.json();
+      this.setState({ data: responseJson });
+    }
+    catch (error) {
+      return console.error(error);
+    }
+  }
+
   componentDidMount() {
     this.getIndexData();
   }
@@ -84,12 +102,10 @@ export default class MapDisplay extends React.Component {
 
     return (
       <ReactMapGL
-        width='100%'
-        height='100%'
         {...viewport}
         mapboxApiAccessToken={token}
         onViewportChange={(viewport) => this.setState({ viewport })}
-        onMouseUp={() => this.getIndexData()}
+        onMouseUp={() => this.getIndexDataByChannel()}
         ref={map => this.mapRef = map}
       >
         {this.markers.map((marker) => <Marker {...marker}>
