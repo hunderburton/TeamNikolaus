@@ -10,8 +10,9 @@ class NDVI:
         self.boundingBox = boundingBox
         self.date = date
         self.itemList = itemList
-        self.tilesize = (int) (res / 10)
-        print(self.tilesize)
+        self.spatialResolution = 10
+        print(res)
+        self.tilesize = (int) (res / self.spatialResolution)
         self.service_endpoint = "https://processing.code-de.org/rasdaman/ows"
         self.base_wcs_url = self.service_endpoint + "?service=WCS&version=2.0.1"
         self.requestTemplateNDVI =     '''
@@ -43,7 +44,7 @@ class NDVI:
                 east = (j + (self.tilesize / 2)) * (self.boundingBox[1] - self.boundingBox[0]) / w + self.boundingBox[0]
                 north = (i + (self.tilesize / 2)) * (self.boundingBox[3] - self.boundingBox[2]) / h + self.boundingBox[3]
 
-                key = str(i) + "." + str(j)
+                key = str(east) + "." + str(north)
                 if(key not in self.itemList.keys()):
                     self.itemList[key] = TileIndex(north, east)
                 self.itemList[key].setVegIndex(self.calcVegIndex(tile))

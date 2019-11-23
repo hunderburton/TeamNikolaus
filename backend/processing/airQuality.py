@@ -9,7 +9,7 @@ class AirQuality:
     def __init__(self, boundingBox, date, res = 100, itemList = {}):
         self.boundingBox = boundingBox
         self.date = date
-        self.spatialResolution = 1000
+        self.spatialResolution = 2000
         self.itemList = itemList
         # Resolution around 7 km
         self.tilesize = (int) (res / 10)
@@ -18,7 +18,6 @@ class AirQuality:
         else:
             self.tilesize = 1
         self.resolution = res
-        print(self.tilesize)
 
         self.service_endpoint = "https://processing.code-de.org/rasdaman/ows"
         self.base_wcs_url = self.service_endpoint + "?service=WCS&version=2.0.1"
@@ -69,7 +68,7 @@ class AirQuality:
                             lat = 0.5 * heightOfTileLat + (y * tilesPerPixel + l) * heightOfTileLat + self.boundingBox[2]
                             index = TileIndex(lat, lon)
                             # print(index)
-                            key = str(x * tilesPerPixel + k) + "." + str(y * tilesPerPixel + l)
+                            key = str(lon) + "." + str(lat)
                             if(key not in self.itemList.keys()):
                                 self.itemList[key] = TileIndex(lat, lon)
                             self.itemList[key].setNo2Index(pixelIndex)
@@ -81,7 +80,7 @@ class AirQuality:
                     lon = (x + (self.tilesize / 2)) * (self.boundingBox[1] - self.boundingBox[0]) / pixelsInWidth + self.boundingBox[0] + self.boundingBox[0]
                     lat = (y + (self.tilesize / 2)) * (self.boundingBox[3] - self.boundingBox[2]) / pixelsInHeight + self.boundingBox[3] + self.boundingBox[2]
                     index = TileIndex(lat, lon)
-                    key = str(x) + "." + str(y)
+                    key = str(lon) + "." + str(lat)
                     if(key not in self.itemList.keys()):
                         self.itemList[key] = TileIndex(lat, lon)
                     self.itemList[key].setNo2Index(self.calcIndex(tile))
